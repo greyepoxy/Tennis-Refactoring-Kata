@@ -1,0 +1,12 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/Tennis/bin/Debug
+*.suo
+/Tennis/obj/Debug
+/packages/NUnit.3.4.1
+/packages/NUnit3TestAdapter.3.7.0
+*.user
+*.cache
+packages
