@@ -29,19 +29,13 @@ namespace Tennis
 			var tempScore = 0;
 			if (m_score1 == m_score2)
 			{
-				switch (m_score1) {
-					case 0:
-						score = "Love-All";
-						break;
-					case 1:
-						score = "Fifteen-All";
-						break;
-					case 2:
-						score = "Thirty-All";
-						break;
-					default:
-						score = "Deuce";
-						break;
+				if (m_score1 < 3)
+				{
+					score = ConvertScoreToString(m_score1) + "-" + "All";
+				}
+				else
+				{
+					score = "Deuce";
 				}
 			}
 			else if (m_score1 >= 4 || m_score2 >= 4)
@@ -66,9 +60,7 @@ namespace Tennis
 			}
 			else
 			{
-				score = ConvertScoreToString(m_score1);
-				score += "-";
-				score += ConvertScoreToString(m_score2);
+				score = ConvertScoreToString(m_score1) + "-" + ConvertScoreToString(m_score2);
 			}
 			return score;
 		}
