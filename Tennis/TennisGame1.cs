@@ -25,30 +25,24 @@ namespace Tennis
 
 				return "Deuce";
 			}
-			else if (_tennisGameState.Player1Score >= 4 || _tennisGameState.Player2Score >= 4)
+			if (_tennisGameState.Player1Score >= 4 || _tennisGameState.Player2Score >= 4)
 			{
 				var minusResult = _tennisGameState.Player1Score - _tennisGameState.Player2Score;
 				if (minusResult == 1)
 				{
 					return "Advantage player1";
 				}
-				else if (minusResult == -1)
+				if (minusResult == -1)
 				{
 					return "Advantage player2";
 				}
-				else if (minusResult >= 2)
+				if (minusResult >= 2)
 				{
 					return "Win for player1";
 				}
-				else
-				{
-					return "Win for player2";
-				}
+				return "Win for player2";
 			}
-			else
-			{
-				return ConvertScoreToString(_tennisGameState.Player1Score) + "-" + ConvertScoreToString(_tennisGameState.Player2Score);
-			}
+			return ConvertScoreToString(_tennisGameState.Player1Score) + "-" + ConvertScoreToString(_tennisGameState.Player2Score);
 		}
 
 		private static string ConvertScoreToString(int score)
