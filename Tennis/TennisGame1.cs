@@ -4,31 +4,30 @@ namespace Tennis
 {
 	class TennisGame1 : ITennisGame
 	{
-		private int m_score1 = 0;
-		private int m_score2 = 0;
+		private readonly TennisGameState _tennisGameState = new TennisGameState();
 
 		public void WonPoint(string playerName)
 		{
 			if (playerName == "player1")
-				m_score1 += 1;
+				_tennisGameState.Player1Score += 1;
 			else
-				m_score2 += 1;
+				_tennisGameState.Player2Score += 1;
 		}
 
 		public string GetScore()
 		{
-			if (m_score1 == m_score2)
+			if (_tennisGameState.Player1Score == _tennisGameState.Player2Score)
 			{
-				if (m_score1 < 3)
+				if (_tennisGameState.Player1Score < 3)
 				{
-					return ConvertScoreToString(m_score1) + "-" + "All";
+					return ConvertScoreToString(_tennisGameState.Player1Score) + "-" + "All";
 				}
 
 				return "Deuce";
 			}
-			else if (m_score1 >= 4 || m_score2 >= 4)
+			else if (_tennisGameState.Player1Score >= 4 || _tennisGameState.Player2Score >= 4)
 			{
-				var minusResult = m_score1 - m_score2;
+				var minusResult = _tennisGameState.Player1Score - _tennisGameState.Player2Score;
 				if (minusResult == 1)
 				{
 					return "Advantage player1";
@@ -48,7 +47,7 @@ namespace Tennis
 			}
 			else
 			{
-				return ConvertScoreToString(m_score1) + "-" + ConvertScoreToString(m_score2);
+				return ConvertScoreToString(_tennisGameState.Player1Score) + "-" + ConvertScoreToString(_tennisGameState.Player2Score);
 			}
 		}
 
