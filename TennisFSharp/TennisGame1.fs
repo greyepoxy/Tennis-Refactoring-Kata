@@ -1,7 +1,8 @@
 ﻿namespace Tennis
 
 type ITennisGame =
-    abstract WonPoint : string -> ITennisGame
+    abstract Player1WonPoint : unit -> ITennisGame
+    abstract Player2WonPoint : unit -> ITennisGame
     abstract GetScore : unit -> string
 
 type PlayerPoints = {player1: int; player2: int}
@@ -52,10 +53,10 @@ type TennisGame1(?player1Score: int, ?player2Score: int) =
         | Some result -> Some(result)
         | None -> ruleFunc(_state)
     interface ITennisGame with
-        member this.WonPoint(playerName) =
-            match playerName with
-            | "player1" -> TennisGame1(_state.player1 + 1, _state.player2) :> ITennisGame
-            | _ -> TennisGame1(_state.player1, _state.player2 + 1) :> ITennisGame
+        member this.Player1WonPoint() =
+            TennisGame1(_state.player1 + 1, _state.player2) :> ITennisGame
+        member this.Player2WonPoint() =
+            TennisGame1(_state.player1, _state.player2 + 1) :> ITennisGame
         member this.GetScore() =
             ScoreCalculationRules.GetScoreIfTieDuringRegularPlay(_state)
                 |> ChainStateIfNone ScoreCalculationRules.GetScoreIfTieDuringExtendedPlay

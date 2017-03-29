@@ -49,5 +49,8 @@ type ExampleGameTennisTest() =
         let points = [ "player1"; "player1"; "player2"; "player2"; "player1"; "player1" ]
         let expectedScores = [ "Fifteen-Love"; "Thirty-Love"; "Thirty-Fifteen"; "Thirty-All"; "Forty-Thirty"; "Win for player1" ]
         for i in [0..5] do
-            game <- game.WonPoint(points.[i])
+            if points.[i] = "player1" then
+                game <- game.Player1WonPoint()
+            else
+                game <- game.Player2WonPoint()
             Assert.AreEqual(expectedScores.[i], game.GetScore())
