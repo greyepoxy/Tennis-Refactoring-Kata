@@ -4,13 +4,13 @@ type ITennisGame =
     abstract WonPoint : string -> ITennisGame
     abstract GetScore : unit -> string
 
-type TennisGameState = {player1Score: int; player2Score: int}
+type PlayerPoints = {player1: int; player2: int}
 
 type TennisGame1(?player1Score: int, ?player2Score: int) =
     let orZero value = defaultArg value 0
-    let _state:TennisGameState = 
-        {player1Score = player1Score |> orZero;
-         player2Score = player2Score |> orZero}
+    let _state:PlayerPoints = 
+        {player1 = player1Score |> orZero;
+         player2 = player2Score |> orZero}
     let ConvertScoreToString(score) =
         match score with
         | 0 -> Some("Love")
@@ -18,19 +18,19 @@ type TennisGame1(?player1Score: int, ?player2Score: int) =
         | 2 -> Some("Thirty")
         | 3 -> Some("Forty")
         | _ -> None
-    let GetScoreIfTieDuringRegularPlay({player1Score = player1Score; player2Score = player2Score}) =
-        if player1Score = player2Score && player1Score < 3 then
-            Some(ConvertScoreToString(player1Score).Value + "-" + "All")
+    let GetScoreIfTieDuringRegularPlay({player1 = player1Points; player2 = player2Points}) =
+        if player1Points = player2Points && player1Points < 3 then
+            Some(ConvertScoreToString(player1Points).Value + "-" + "All")
         else
             None
-    let GetScoreIfTieDuringExtendedPlay({player1Score = player1Score; player2Score = player2Score}) =
-        if player1Score = player2Score && player1Score >= 3 then
+    let GetScoreIfTieDuringExtendedPlay({player1 = player1Points; player2 = player2Points}) =
+        if player1Points = player2Points && player1Points >= 3 then
             Some("Deuce")
         else
             None
-    let GetScoreIfWinOrAdvantage({player1Score = player1Score; player2Score = player2Score}) =
-        if player1Score > 3 || player2Score > 3 then
-            let diff = player1Score - player2Score
+    let GetScoreIfWinOrAdvantage({player1 = player1Points; player2 = player2Points}) =
+        if player1Points > 3 || player2Points > 3 then
+            let diff = player1Points - player2Points
             match diff with
             | 1 -> Some("Advantage player1")
             | -1 -> Some("Advantage player2")
@@ -39,20 +39,20 @@ type TennisGame1(?player1Score: int, ?player2Score: int) =
             | _ -> None
         else
             None
-    let GetScoreForNormalPlayWhenNotATie({player1Score = player1Score; player2Score = player2Score}) =
-        if player1Score <> player2Score && player1Score <= 3 then
-            Some(ConvertScoreToString(player1Score).Value + "-" + ConvertScoreToString(player2Score).Value)
+    let GetScoreForNormalPlayWhenNotATie({player1 = player1Points; player2 = player2Points}) =
+        if player1Points <> player2Points && player1Points <= 3 then
+            Some(ConvertScoreToString(player1Points).Value + "-" + ConvertScoreToString(player2Points).Value)
         else
             None
-    let ChainStateIfNone (ruleFunc: (TennisGameState -> Option<string>)) (maybeResult: Option<string>) =
+    let ChainStateIfNone (ruleFunc: (PlayerPoints -> Option<string>)) (maybeResult: Option<string>) =
         match maybeResult with
         | Some result -> Some(result)
         | None -> ruleFunc(_state)
     interface ITennisGame with
         member this.WonPoint(playerName) =
             match playerName with
-            | "player1" -> TennisGame1(_state.player1Score + 1, _state.player2Score) :> ITennisGame
-            | _ -> TennisGame1(_state.player1Score, _state.player2Score + 1) :> ITennisGame
+            | "player1" -> TennisGame1(_state.player1 + 1, _state.player2) :> ITennisGame
+            | _ -> TennisGame1(_state.player1, _state.player2 + 1) :> ITennisGame
         member this.GetScore() =
             GetScoreIfTieDuringRegularPlay(_state)
                 |> ChainStateIfNone GetScoreIfTieDuringExtendedPlay
