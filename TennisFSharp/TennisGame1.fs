@@ -1,11 +1,15 @@
 ﻿namespace Tennis
 
-type ITennisGame =
-    abstract Player1WonPoint : unit -> ITennisGame
-    abstract Player2WonPoint : unit -> ITennisGame
-    abstract GetScore : unit -> string
+type PlayerPoints = {player1: int; player2: int} with
+    static member GetInstance(?player1Points: int, ?player2Points: int) =
+        let orZero value = defaultArg value 0
+        {player1 = player1Points |> orZero;
+        player2 = player2Points |> orZero}
 
-type PlayerPoints = {player1: int; player2: int}
+type ITennisGame =
+    abstract Player1WonPoint : PlayerPoints -> PlayerPoints
+    abstract Player2WonPoint : PlayerPoints -> PlayerPoints
+    abstract GetScore : PlayerPoints -> string
 
 module ScoreCalculationRules =
     let ConverPointsToScore(points) =
@@ -42,25 +46,21 @@ module ScoreCalculationRules =
         else
             None
 
-
-type TennisGame1(?player1Score: int, ?player2Score: int) =
-    let orZero value = defaultArg value 0
-    member this.Points:PlayerPoints = 
-        {player1 = player1Score |> orZero;
-         player2 = player2Score |> orZero}
-    member private this.ChainStateIfNone (ruleFunc: (PlayerPoints -> Option<string>)) (maybeResult: Option<string>) =
-        match maybeResult with
-        | Some result -> Some(result)
-        | None -> ruleFunc(this.Points)
+type TennisGame1() =
+    let ChainIfNone (ruleFunc: (unit -> Option<string>)) (maybeResult: Option<string>) =
+            match maybeResult with
+            | Some result -> Some(result)
+            | None -> ruleFunc()
     interface ITennisGame with
-        member this.Player1WonPoint() =
-            TennisGame1(this.Points.player1 + 1, this.Points.player2) :> ITennisGame
-        member this.Player2WonPoint() =
-            TennisGame1(this.Points.player1, this.Points.player2 + 1) :> ITennisGame
-        member this.GetScore() =
+        member this.Player1WonPoint(points) =
+            {points with player1 = points.player1 + 1}
+        member this.Player2WonPoint(points) =
+            {points with player2 = points.player2 + 1}
+        member this.GetScore(points) =
+            let ChainStateIfNone = fun (ruleFunc: (PlayerPoints -> Option<string>)) -> ChainIfNone(fun unit -> ruleFunc(points))
             None
-            |> this.ChainStateIfNone ScoreCalculationRules.GetScoreIfTieDuringRegularPlay
-            |> this.ChainStateIfNone ScoreCalculationRules.GetScoreIfTieDuringExtendedPlay
-            |> this.ChainStateIfNone ScoreCalculationRules.GetScoreIfWinOrAdvantage
-            |> this.ChainStateIfNone ScoreCalculationRules.GetScoreForNormalPlayWhenNotATie
+            |> ChainStateIfNone ScoreCalculationRules.GetScoreIfTieDuringRegularPlay
+            |> ChainStateIfNone ScoreCalculationRules.GetScoreIfTieDuringExtendedPlay
+            |> ChainStateIfNone ScoreCalculationRules.GetScoreIfWinOrAdvantage
+            |> ChainStateIfNone ScoreCalculationRules.GetScoreForNormalPlayWhenNotATie
             |> Option.get

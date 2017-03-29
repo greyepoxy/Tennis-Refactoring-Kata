@@ -38,19 +38,21 @@ open NUnit.Framework
 type TennisTests(player1Score: int, player2Score: int, expectedScore: string) =
     [<Test>]
     member this.CheckTennisGame1() =
-        let game = Tennis.TennisGame1(player1Score, player2Score) :> Tennis.ITennisGame
-        Assert.AreEqual(expectedScore, game.GetScore())
+        let gameLogic = Tennis.TennisGame1() :> Tennis.ITennisGame
+        let gameState = Tennis.PlayerPoints.GetInstance(player1Score, player2Score)
+        Assert.AreEqual(expectedScore, gameLogic.GetScore(gameState))
 
 [<TestFixture>]
 type ExampleGameTennisTest() =
     [<Test>]
     member this.CheckGame1() =
-        let mutable game = Tennis.TennisGame1() :> Tennis.ITennisGame
+        let gameLogic = Tennis.TennisGame1() :> Tennis.ITennisGame
+        let mutable gameState = Tennis.PlayerPoints.GetInstance()
         let points = [ "player1"; "player1"; "player2"; "player2"; "player1"; "player1" ]
         let expectedScores = [ "Fifteen-Love"; "Thirty-Love"; "Thirty-Fifteen"; "Thirty-All"; "Forty-Thirty"; "Win for player1" ]
         for i in [0..5] do
             if points.[i] = "player1" then
-                game <- game.Player1WonPoint()
+                gameState <- gameLogic.Player1WonPoint(gameState)
             else
-                game <- game.Player2WonPoint()
-            Assert.AreEqual(expectedScores.[i], game.GetScore())
+                gameState <- gameLogic.Player2WonPoint(gameState)
+            Assert.AreEqual(expectedScores.[i], gameLogic.GetScore(gameState))
