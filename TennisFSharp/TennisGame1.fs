@@ -15,24 +15,38 @@ type TennisGame1() =
         | 2 -> Some("Thirty")
         | 3 -> Some("Forty")
         | _ -> None
+    let GetScoreIfTieDuringRegularPlay({player1Score = player1Score; player2Score = player2Score}) =
+        if player1Score = player2Score && player1Score < 3 then
+            Some(ConvertScoreToString(player1Score).Value + "-" + "All")
+        else
+            None
+    let GetScoreIfTieDuringExtendedPlay({player1Score = player1Score; player2Score = player2Score}) =
+        if player1Score = player2Score && player1Score >= 3 then
+            Some("Deuce")
+        else
+            None
+    let GetScoreIfWinOrAdvantage({player1Score = player1Score; player2Score = player2Score}) =
+        if player1Score > 3 || player2Score > 3 then
+            let diff = player1Score - player2Score
+            match diff with
+            | 1 -> Some("Advantage player1")
+            | -1 -> Some("Advantage player2")
+            | diff when diff >= 2 -> Some("Win for player1")
+            | diff when diff <= -2 -> Some("Win for player2")
+            | _ -> None
+        else
+            None
+    let GetScoreForNormalPlayWhenNotATie({player1Score = player1Score; player2Score = player2Score}) =
+        if player1Score <> player2Score && player1Score <= 3 then
+            Some(ConvertScoreToString(player1Score).Value + "-" + ConvertScoreToString(player2Score).Value)
+        else
+            None
     interface ITennisGame with
         member this.WonPoint(playerName) =
             match playerName with
             | "player1" -> _state <- {_state with player1Score = _state.player1Score + 1 }
             | _ -> _state <- {_state with player2Score = _state.player2Score + 1 }
         member this.GetScore() =
-            match _state with
-            | {player1Score = player1Score; player2Score = player2Score} when player1Score = player2Score && player1Score < 3 ->
-                ConvertScoreToString(player1Score).Value + "-" + "All"
-            | {player1Score = player1Score; player2Score = player2Score} when player1Score = player2Score ->
-                "Deuce"
-            | {player1Score = player1Score; player2Score = player2Score} when player1Score >= 4 || player2Score >= 4 ->
-                let diff = player1Score - player2Score
-                match diff with
-                | 1 -> "Advantage player1"
-                | -1 -> "Advantage player2"
-                | diff when diff >= 2 -> "Win for player1"
-                | _ -> "Win for player2"
-            | {player1Score = player1Score; player2Score = player2Score} ->
-                ConvertScoreToString(player1Score).Value + "-" + ConvertScoreToString(player2Score).Value
-
+            let scoreRuleFuncs = [GetScoreIfTieDuringRegularPlay; GetScoreIfTieDuringExtendedPlay; GetScoreIfWinOrAdvantage; GetScoreForNormalPlayWhenNotATie]
+            let matchingScoreRuleCalc = List.find (fun ruleFunc -> Option.isSome(ruleFunc(_state))) scoreRuleFuncs
+            Option.get(matchingScoreRuleCalc(_state))
