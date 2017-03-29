@@ -37,7 +37,7 @@ module ScoreCalculationRules =
         else
             None
     let GetScoreForNormalPlayWhenNotATie({player1 = player1Points; player2 = player2Points}) =
-        if player1Points <> player2Points && player1Points <= 3 then
+        if player1Points <> player2Points && player1Points <= 3 && player2Points <= 3 then
             Some(Option.get (ConverPointsToScore(player1Points)) + "-" + Option.get (ConverPointsToScore(player2Points)))
         else
             None
