@@ -41,12 +41,18 @@ type TennisGame1() =
             Some(ConvertScoreToString(player1Score).Value + "-" + ConvertScoreToString(player2Score).Value)
         else
             None
+    let ChainStateIfNone (ruleFunc: (TennisGameState -> Option<string>)) (maybeResult: Option<string>) =
+        match maybeResult with
+        | Some result -> Some(result)
+        | None -> ruleFunc(_state)
     interface ITennisGame with
         member this.WonPoint(playerName) =
             match playerName with
             | "player1" -> _state <- {_state with player1Score = _state.player1Score + 1 }
             | _ -> _state <- {_state with player2Score = _state.player2Score + 1 }
         member this.GetScore() =
-            let scoreRuleFuncs = [GetScoreIfTieDuringRegularPlay; GetScoreIfTieDuringExtendedPlay; GetScoreIfWinOrAdvantage; GetScoreForNormalPlayWhenNotATie]
-            let matchingScoreRuleCalc = List.find (fun ruleFunc -> Option.isSome(ruleFunc(_state))) scoreRuleFuncs
-            Option.get(matchingScoreRuleCalc(_state))
+            GetScoreIfTieDuringRegularPlay(_state)
+                |> ChainStateIfNone GetScoreIfTieDuringExtendedPlay
+                |> ChainStateIfNone GetScoreIfWinOrAdvantage
+                |> ChainStateIfNone GetScoreForNormalPlayWhenNotATie
+                |> Option.get
