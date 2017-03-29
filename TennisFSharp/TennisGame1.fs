@@ -8,8 +8,8 @@ type ITennisGame =
 type PlayerPoints = {player1: int; player2: int}
 
 module ScoreCalculationRules =
-    let ConvertScoreToString(score) =
-        match score with
+    let ConverPointsToScore(points) =
+        match points with
         | 0 -> Some("Love")
         | 1 -> Some("Fifteen")
         | 2 -> Some("Thirty")
@@ -17,7 +17,7 @@ module ScoreCalculationRules =
         | _ -> None
     let GetScoreIfTieDuringRegularPlay({player1 = player1Points; player2 = player2Points}) =
         if player1Points = player2Points && player1Points < 3 then
-            Some(ConvertScoreToString(player1Points).Value + "-" + "All")
+            Some(Option.get (ConverPointsToScore(player1Points)) + "-" + "All")
         else
             None
     let GetScoreIfTieDuringExtendedPlay({player1 = player1Points; player2 = player2Points}) =
@@ -38,7 +38,7 @@ module ScoreCalculationRules =
             None
     let GetScoreForNormalPlayWhenNotATie({player1 = player1Points; player2 = player2Points}) =
         if player1Points <> player2Points && player1Points <= 3 then
-            Some(ConvertScoreToString(player1Points).Value + "-" + ConvertScoreToString(player2Points).Value)
+            Some(Option.get (ConverPointsToScore(player1Points)) + "-" + Option.get (ConverPointsToScore(player2Points)))
         else
             None
 
