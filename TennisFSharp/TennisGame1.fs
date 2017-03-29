@@ -1,13 +1,16 @@
 ﻿namespace Tennis
 
 type ITennisGame =
-    abstract WonPoint : string -> unit
+    abstract WonPoint : string -> ITennisGame
     abstract GetScore : unit -> string
 
 type TennisGameState = {player1Score: int; player2Score: int}
 
-type TennisGame1() =
-    let mutable _state:TennisGameState = {player1Score = 0; player2Score = 0}
+type TennisGame1(?player1Score: int, ?player2Score: int) =
+    let orZero value = defaultArg value 0
+    let _state:TennisGameState = 
+        {player1Score = player1Score |> orZero;
+         player2Score = player2Score |> orZero}
     let ConvertScoreToString(score) =
         match score with
         | 0 -> Some("Love")
@@ -48,8 +51,8 @@ type TennisGame1() =
     interface ITennisGame with
         member this.WonPoint(playerName) =
             match playerName with
-            | "player1" -> _state <- {_state with player1Score = _state.player1Score + 1 }
-            | _ -> _state <- {_state with player2Score = _state.player2Score + 1 }
+            | "player1" -> TennisGame1(_state.player1Score + 1, _state.player2Score) :> ITennisGame
+            | _ -> TennisGame1(_state.player1Score, _state.player2Score + 1) :> ITennisGame
         member this.GetScore() =
             GetScoreIfTieDuringRegularPlay(_state)
                 |> ChainStateIfNone GetScoreIfTieDuringExtendedPlay
