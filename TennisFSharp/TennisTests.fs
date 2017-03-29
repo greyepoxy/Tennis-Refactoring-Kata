@@ -153,3 +153,31 @@ type ShouldNotReportNormalPlayNonTieingScoreWhenNotNormalPlayOrPlayersAreTied(pl
     member this.Validate() =
         let result = Tennis.ScoreCalculationRules.GetScoreForNormalPlayWhenNotATie({player1 = player1Points; player2 = player2Points})
         Assert.AreEqual(None, result)
+
+[<TestFixture>]
+type PlayersShouldBeAbleToWinPoints() =
+    [<Test>]
+    member this.PlayerOneCanWinPoints() =
+        let gameLogic = Tennis.TennisGame1() :> Tennis.ITennisGame
+        let points = Tennis.PlayerPoints.GetInstance();
+        Assert.AreEqual(0, points.player1)
+        Assert.AreEqual(0, points.player2)
+        Assert.AreEqual(1, gameLogic.Player1WonPoint(points).player1)
+        Assert.AreEqual(0, gameLogic.Player1WonPoint(points).player2)
+        Assert.AreEqual(0, gameLogic.Player2WonPoint(points).player1)
+        Assert.AreEqual(1, gameLogic.Player2WonPoint(points).player2)
+
+[<TestFixture(2, 3, "Thirty-Forty")>]
+[<TestFixture(4, 6, "Win for player2")>]
+[<TestFixture(6, 4, "Win for player1")>]
+[<TestFixture(4, 3, "Advantage player1")>]
+[<TestFixture(3, 4, "Advantage player2")>]
+[<TestFixture(5, 5, "Deuce")>]
+[<TestFixture(1, 1, "Fifteen-All")>]
+type GameLogicShouldChainGetScoreRulesTogether(player1Points, player2Points, expectedResult: string) =
+    [<Test>]
+    member this.Validate() =
+        let gameLogic = Tennis.TennisGame1() :> Tennis.ITennisGame
+        let points = Tennis.PlayerPoints.GetInstance(player1Points, player2Points)
+        let result = gameLogic.GetScore(points)
+        Assert.AreEqual(expectedResult, result)
