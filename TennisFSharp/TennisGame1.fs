@@ -58,8 +58,9 @@ type TennisGame1(?player1Score: int, ?player2Score: int) =
         member this.Player2WonPoint() =
             TennisGame1(_state.player1, _state.player2 + 1) :> ITennisGame
         member this.GetScore() =
-            ScoreCalculationRules.GetScoreIfTieDuringRegularPlay(_state)
-                |> ChainStateIfNone ScoreCalculationRules.GetScoreIfTieDuringExtendedPlay
-                |> ChainStateIfNone ScoreCalculationRules.GetScoreIfWinOrAdvantage
-                |> ChainStateIfNone ScoreCalculationRules.GetScoreForNormalPlayWhenNotATie
-                |> Option.get
+            None
+            |> ChainStateIfNone ScoreCalculationRules.GetScoreIfTieDuringRegularPlay
+            |> ChainStateIfNone ScoreCalculationRules.GetScoreIfTieDuringExtendedPlay
+            |> ChainStateIfNone ScoreCalculationRules.GetScoreIfWinOrAdvantage
+            |> ChainStateIfNone ScoreCalculationRules.GetScoreForNormalPlayWhenNotATie
+            |> Option.get
