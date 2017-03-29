@@ -6,11 +6,7 @@ type ITennisGame =
 
 type PlayerPoints = {player1: int; player2: int}
 
-type TennisGame1(?player1Score: int, ?player2Score: int) =
-    let orZero value = defaultArg value 0
-    let _state:PlayerPoints = 
-        {player1 = player1Score |> orZero;
-         player2 = player2Score |> orZero}
+module ScoreCalculationRules =
     let ConvertScoreToString(score) =
         match score with
         | 0 -> Some("Love")
@@ -44,6 +40,13 @@ type TennisGame1(?player1Score: int, ?player2Score: int) =
             Some(ConvertScoreToString(player1Points).Value + "-" + ConvertScoreToString(player2Points).Value)
         else
             None
+
+
+type TennisGame1(?player1Score: int, ?player2Score: int) =
+    let orZero value = defaultArg value 0
+    let _state:PlayerPoints = 
+        {player1 = player1Score |> orZero;
+         player2 = player2Score |> orZero}
     let ChainStateIfNone (ruleFunc: (PlayerPoints -> Option<string>)) (maybeResult: Option<string>) =
         match maybeResult with
         | Some result -> Some(result)
@@ -54,8 +57,8 @@ type TennisGame1(?player1Score: int, ?player2Score: int) =
             | "player1" -> TennisGame1(_state.player1 + 1, _state.player2) :> ITennisGame
             | _ -> TennisGame1(_state.player1, _state.player2 + 1) :> ITennisGame
         member this.GetScore() =
-            GetScoreIfTieDuringRegularPlay(_state)
-                |> ChainStateIfNone GetScoreIfTieDuringExtendedPlay
-                |> ChainStateIfNone GetScoreIfWinOrAdvantage
-                |> ChainStateIfNone GetScoreForNormalPlayWhenNotATie
+            ScoreCalculationRules.GetScoreIfTieDuringRegularPlay(_state)
+                |> ChainStateIfNone ScoreCalculationRules.GetScoreIfTieDuringExtendedPlay
+                |> ChainStateIfNone ScoreCalculationRules.GetScoreIfWinOrAdvantage
+                |> ChainStateIfNone ScoreCalculationRules.GetScoreForNormalPlayWhenNotATie
                 |> Option.get
