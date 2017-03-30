@@ -52,8 +52,9 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="TennisGame1.fs" />
-    <Compile Include="TennisTests.fs" />
+    <Compile Include="OriginalTennisTests.fs" />
     <Content Include="packages.config" />
+    <Compile Include="TennisTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
